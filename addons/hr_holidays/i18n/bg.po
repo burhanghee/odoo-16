@@ -21,6 +21,8 @@
 # Elena Varbanova, 2024
 # Petko Karamotchev, 2024
 # Emil Krastev, 2024
+# margarita.katzeva, 2025
+# Martin Dinovski, 2025
 # Veselina Slavkova, 2025
 # 
 msgid ""
@@ -2027,7 +2029,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__request_unit_half
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__request_unit__half_day
 msgid "Half Day"
-msgstr ""
+msgstr "Половин Ден"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__has_message
@@ -2625,7 +2627,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter_report
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
 msgid "My Department"
-msgstr ""
+msgstr "Моят отдел"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter_report
@@ -2973,7 +2975,7 @@ msgstr ""
 #. module: hr_holidays
 #: model:ir.ui.menu,name:hr_holidays.menu_hr_holidays_dashboard
 msgid "Overview"
-msgstr ""
+msgstr "Общ преглед"
 
 #. module: hr_holidays
 #: model:hr.leave.type,name:hr_holidays.holiday_status_cl
@@ -4527,7 +4529,7 @@ msgstr ""
 #: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
 #, python-format
 msgid "available"
-msgstr ""
+msgstr "наличен"
 
 #. module: hr_holidays
 #: model:ir.ui.menu,name:hr_holidays.menu_hr_available_holidays_report_tree

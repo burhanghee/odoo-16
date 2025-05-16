@@ -8,13 +8,14 @@
 # Martin Trigaux, 2023
 # lhmflexerp <lhm@flexerp.dk>, 2023
 # Sanne Kristensen <sanne@vkdata.dk>, 2024
+# Wil Odoo, 2025
 # Sammi Iversen <sammi@vkdata.dk>, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-23 08:23+0000\n"
+"POT-Creation-Date: 2025-05-06 20:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:45+0000\n"
 "Last-Translator: Sammi Iversen <sammi@vkdata.dk>, 2025\n"
 "Language-Team: Danish (https://app.transifex.com/odoo/teams/41243/da/)\n"
@@ -68,11 +69,6 @@ msgstr "Aktiv"
 #: model_terms:ir.actions.act_window,help:analytic.action_analytic_account_form
 msgid "Add a new analytic account"
 msgstr "Tilføj en ny analytisk konto"
-
-#. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_administratif
-msgid "Administrative"
-msgstr "Administrative"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__all_account_count
@@ -237,11 +233,6 @@ msgid "Associated Partner"
 msgstr "Tilknyttet partner"
 
 #. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_asustek
-msgid "Asustek"
-msgstr ""
-
-#. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_attachment_count
 msgid "Attachment Count"
 msgstr "Antal vedhæftninger"
@@ -256,16 +247,6 @@ msgstr "Balance"
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_kanban
 msgid "Balance:"
 msgstr "Balance:"
-
-#. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_partners_camp_to_camp
-msgid "Camp to Camp"
-msgstr ""
-
-#. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_integration_c2c
-msgid "CampToCamp"
-msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__category
@@ -301,11 +282,6 @@ msgstr "Farve"
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__color
 msgid "Color Index"
 msgstr "Farve index"
-
-#. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_commercial_marketing
-msgid "Commercial & Marketing"
-msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__company_id
@@ -397,18 +373,8 @@ msgid "Debit"
 msgstr "Debet"
 
 #. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_agrolait
-msgid "Deco Addict"
-msgstr ""
-
-#. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__default_applicability
 msgid "Default Applicability"
-msgstr ""
-
-#. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_deltapc
-msgid "Delta PC"
 msgstr ""
 
 #. module: analytic
@@ -416,11 +382,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__description
 msgid "Description"
 msgstr "Beskrivelse"
-
-#. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_desertic_hispafuentes
-msgid "Desertic - Hispafuentes"
-msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__display_name
@@ -540,16 +501,6 @@ msgid "Loading..."
 msgstr "Indlæser..."
 
 #. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_think_big_systems
-msgid "Lumber Inc"
-msgstr ""
-
-#. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_luminous_technologies
-msgid "Luminous Technologies"
-msgstr ""
-
-#. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_main_attachment_id
 msgid "Main Attachment"
 msgstr "Vedhæftning"
@@ -561,7 +512,7 @@ msgstr "Vedhæftning"
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_plan__default_applicability__mandatory
 #, python-format
 msgid "Mandatory"
-msgstr ""
+msgstr "Obligatorisk"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_has_error
@@ -572,11 +523,6 @@ msgstr "Besked ved leveringsfejl"
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_ids
 msgid "Messages"
 msgstr "Beskeder"
-
-#. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_millennium_industries
-msgid "Millennium Industries"
-msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_applicability__business_domain__general
@@ -590,9 +536,11 @@ msgid "Name"
 msgstr "Navn"
 
 #. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_nebula
-msgid "Nebula"
-msgstr ""
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
+#, python-format
+msgid "New Model"
+msgstr "Ny Model"
 
 #. module: analytic
 #. odoo-javascript
@@ -650,12 +598,7 @@ msgstr "Ok"
 #: code:addons/analytic/models/analytic_mixin.py:0
 #, python-format
 msgid "One or more lines require a 100% analytic distribution."
-msgstr ""
-
-#. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_internal
-msgid "Operating Costs"
-msgstr ""
+msgstr "En eller flere linjer kræver en 100 % analytisk fordeling."
 
 #. module: analytic
 #. odoo-python
@@ -677,11 +620,6 @@ msgstr "Valgfri"
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_line__category__other
 msgid "Other"
 msgstr "Andet"
-
-#. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_our_super_product
-msgid "Our Super Product"
-msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__parent_id
@@ -729,11 +667,6 @@ msgid "Reference"
 msgstr "Reference"
 
 #. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_rd_department
-msgid "Research & Development"
-msgstr ""
-
-#. module: analytic
 #: model_terms:ir.actions.act_window,help:analytic.account_analytic_line_action
 #: model_terms:ir.actions.act_window,help:analytic.account_analytic_line_action_entries
 msgid ""
@@ -750,11 +683,6 @@ msgstr ""
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__root_plan_id
 msgid "Root Plan"
-msgstr ""
-
-#. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_seagate_p2
-msgid "Seagate P2"
 msgstr ""
 
 #. module: analytic
@@ -806,11 +734,6 @@ msgid "Simultaneous conditions to meet"
 msgstr ""
 
 #. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_spark
-msgid "Spark Systems"
-msgstr ""
-
-#. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_plan_form_view
 msgid "Subplans"
 msgstr ""
@@ -825,11 +748,6 @@ msgid ""
 msgstr ""
 "Den valgte konto tilhører en anden virksomhed end den, du prøver at oprette "
 "en analytisk genstand for"
-
-#. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_absences
-msgid "Time Off"
-msgstr "Fri"
 
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_tree

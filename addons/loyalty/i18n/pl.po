@@ -28,7 +28,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2025-05-08 20:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
 "Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Polish (https://app.transifex.com/odoo/teams/41243/pl/)\n"
@@ -1709,6 +1709,7 @@ msgstr ""
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__reward_ids
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 msgid "Rewards"
 msgstr "Nagrody"
 
@@ -1822,6 +1823,13 @@ msgstr "Kod promocyjny musi być unikalny."
 #: model:ir.model.constraint,message:loyalty.constraint_loyalty_reward_required_points_positive
 msgid "The required points for a reward must be strictly positive."
 msgstr "Punkty wymagane do otrzymania nagrody muszą być ściśle dodatnie."
+
+#. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_reward.py:0
+#, python-format
+msgid "The reward description field cannot be empty."
+msgstr ""
 
 #. module: loyalty
 #: model:ir.model.constraint,message:loyalty.constraint_loyalty_reward_product_qty_positive
@@ -1971,13 +1979,6 @@ msgstr "Z kodem promocyjnym"
 #, python-format
 msgid "You can not delete a program in an active state"
 msgstr "Nie można usunąć programu w stanie aktywnym"
-
-#. module: loyalty
-#. odoo-python
-#: code:addons/loyalty/models/loyalty_reward.py:0
-#, python-format
-msgid "The reward description field cannot be empty."
-msgstr ""
 
 #. module: loyalty
 #. odoo-python

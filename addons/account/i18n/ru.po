@@ -38,16 +38,16 @@
 # Смородин Даниил, 2024
 # Сергей Шебанин <sergey@shebanin.ru>, 2024
 # Nadia Martynova, 2024
-# Wil Odoo, 2024
 # Ilya Rozhkov, 2025
+# Wil Odoo, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2025-05-06 20:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:44+0000\n"
-"Last-Translator: Ilya Rozhkov, 2025\n"
+"Last-Translator: Wil Odoo, 2025\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -119,6 +119,12 @@ msgid "# Reconciled Statement Lines"
 msgstr "# Строки выверенного отчета"
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_res_partner__supplier_invoice_count
+#: model:ir.model.fields,field_description:account.field_res_users__supplier_invoice_count
+msgid "# Vendor Bills"
+msgstr "# счета поставщиков"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_chart_template__code_digits
 msgid "# of Digits"
 msgstr "Кол-во цифр"
@@ -175,6 +181,7 @@ msgstr " %s (Копия)"
 #: code:addons/account/models/account_account.py:0
 #: code:addons/account/models/account_account.py:0
 #: code:addons/account/models/account_journal.py:0
+#: code:addons/account/models/account_payment_term.py:0
 #: code:addons/account/models/account_reconcile_model.py:0
 #: code:addons/account/models/account_reconcile_model.py:0
 #, python-format
@@ -285,12 +292,6 @@ msgstr "(в комплекте)."
 #, python-format
 msgid "(including this document) "
 msgstr ""
-
-#. module: account
-#: model:ir.actions.report,print_report_name:account.account_invoices
-#: model:ir.actions.report,print_report_name:account.account_invoices_without_payment
-msgid "(object._get_report_base_filename())"
-msgstr "(object._get_report_base_filename())"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_payment_term_form
@@ -2947,6 +2948,7 @@ msgstr "Подтверждать автоматически"
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 #: code:addons/account/models/company.py:0
+#: code:addons/account/models/company.py:0
 #, python-format
 msgid "Automatic Balancing Line"
 msgstr "Строка автоматического баланса"
@@ -3565,7 +3567,7 @@ msgstr "Невозможно создать документ продажи в �
 #: code:addons/account/wizard/accrued_orders.py:0
 #, python-format
 msgid "Cannot create an accrual entry with orders in different currencies."
-msgstr ""
+msgstr "Нельзя создать запись начисления с заказами в разных валютах."
 
 #. module: account
 #. odoo-python
@@ -5479,26 +5481,6 @@ msgid "Delivery address for current invoice."
 msgstr "Адрес доставки для текущего документа продажи."
 
 #. module: account
-#: model:account.account.tag,name:account.demo_ceo_wages_account
-msgid "Demo CEO Wages Account"
-msgstr "Демо-счет заработной платы генерального директора"
-
-#. module: account
-#: model:account.account.tag,name:account.demo_capital_account
-msgid "Demo Capital Account"
-msgstr "Демо-счет капитала"
-
-#. module: account
-#: model:account.account.tag,name:account.demo_sale_of_land_account
-msgid "Demo Sale of Land Account"
-msgstr "Демонстрационный счет продажи земли"
-
-#. module: account
-#: model:account.account.tag,name:account.demo_stock_account
-msgid "Demo Stock Account"
-msgstr "Демо-счет акций"
-
-#. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__deprecated
 msgid "Deprecated"
 msgstr "Устаревшие"
@@ -6504,11 +6486,6 @@ msgid "Financial Tags"
 msgstr ""
 
 #. module: account
-#: model:account.account.tag,name:account.account_tag_financing
-msgid "Financing Activities"
-msgstr "Финансовая деятельность"
-
-#. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_partner_mapping__payment_ref_regex
 msgid "Find Text in Label"
 msgstr "Найти текст в метке"
@@ -7233,6 +7210,7 @@ msgstr "Идентификатор"
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/account_move.py:0
 #: code:addons/account/models/chart_template.py:0
 #, python-format
 msgid "INV"
@@ -7883,11 +7861,6 @@ msgid "Invert Tags"
 msgstr "Теги Инвертировать"
 
 #. module: account
-#: model:account.account.tag,name:account.account_tag_investing
-msgid "Investing & Extraordinary Activities"
-msgstr "Инвестиционная и чрезвычайная деятельность"
-
-#. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 #: model:ir.model.fields,field_description:account.field_res_partner__invoice_warn
@@ -8102,10 +8075,10 @@ msgid "Invoice: Sending"
 msgstr "Счет-фактура: отправка"
 
 #. module: account
-#: model:mail.template,report_name:account.email_template_edi_invoice
-msgid ""
-"Invoice_{{ (object.name or '').replace('/','_') }}{{ object.state == 'draft'"
-" and '_draft' or '' }}"
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid "Invoice_%(name)s%(post)s"
 msgstr ""
 
 #. module: account
@@ -8210,6 +8183,12 @@ msgstr "Наследие приложений для выставления сч
 #: model:ir.model.fields.selection,name:account.selection__account_reconcile_model_template__match_amount__between
 msgid "Is Between"
 msgstr "между"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_res_partner__is_coa_installed
+#: model:ir.model.fields,field_description:account.field_res_users__is_coa_installed
+msgid "Is Coa Installed"
+msgstr "Установлен ли план счетов"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__is_complete
@@ -8324,6 +8303,13 @@ msgstr ""
 #, python-format
 msgid "It was previously '%(previous)s' and it is now '%(current)s'."
 msgstr "Раньше было '%(previous)s', теперь стало '%(current)s'."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_line.py:0
+#, python-format
+msgid "Items With Missing Analytic Distribution"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__res_company__fiscalyear_last_month__1
@@ -9709,6 +9695,16 @@ msgid "Newest first"
 msgstr "Сначала новые"
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_bank_statement_line__activity_calendar_event_id
+#: model:ir.model.fields,field_description:account.field_account_journal__activity_calendar_event_id
+#: model:ir.model.fields,field_description:account.field_account_move__activity_calendar_event_id
+#: model:ir.model.fields,field_description:account.field_account_payment__activity_calendar_event_id
+#: model:ir.model.fields,field_description:account.field_account_setup_bank_manual_config__activity_calendar_event_id
+#: model:ir.model.fields,field_description:account.field_res_partner_bank__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr "Следующее событие календаря активности"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__activity_date_deadline
 #: model:ir.model.fields,field_description:account.field_account_journal__activity_date_deadline
 #: model:ir.model.fields,field_description:account.field_account_move__activity_date_deadline
@@ -10115,11 +10111,6 @@ msgid "Off-Balance Sheet"
 msgstr "Забалансовый счёт"
 
 #. module: account
-#: model:account.account.tag,name:account.demo_office_furniture_account
-msgid "Office Furniture"
-msgstr "Принадлежности офисные"
-
-#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_reconcile_model__matching_order__old_first
 #: model:ir.model.fields.selection,name:account.selection__account_reconcile_model_template__matching_order__old_first
 msgid "Oldest first"
@@ -10176,6 +10167,13 @@ msgid "One or more Bank Accounts set on this partner are also used by other"
 msgstr ""
 "Один или несколько банковских счетов, установленных на этого партнера, также"
 " используются другими"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_line.py:0
+#, python-format
+msgid "One or more lines require a 100% analytic distribution."
+msgstr "Одна или несколько линий требуют 100% aнального распределения."
 
 #. module: account
 #. odoo-python
@@ -10303,11 +10301,6 @@ msgstr "Открытие перемещения опубликовано"
 #, python-format
 msgid "Opening balance"
 msgstr "Начальное сальдо"
-
-#. module: account
-#: model:account.account.tag,name:account.account_tag_operating
-msgid "Operating Activities"
-msgstr "Операционная деятельность"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
@@ -11709,6 +11702,11 @@ msgid "Reconciliation Parts"
 msgstr "Элементы Согласования"
 
 #. module: account
+#: model_terms:ir.actions.act_window,help:account.res_partner_action_supplier_bills
+msgid "Record a new vendor bill"
+msgstr "Создать новый счет от поставщика"
+
+#. module: account
 #. odoo-python
 #: code:addons/account/models/account_tax.py:0
 #, python-format
@@ -12444,6 +12442,13 @@ msgid "See all activities"
 msgstr "Посмотреть все мероприятия"
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_line.py:0
+#, python-format
+msgid "See items"
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_journal__type
 msgid ""
 "Select 'Sale' for customer invoices journals.\n"
@@ -12724,6 +12729,13 @@ msgstr "Услуги"
 #, python-format
 msgid "Set a price"
 msgstr "Установите цену"
+
+#. module: account
+#: model:ir.model.fields,help:account.field_res_partner__use_partner_credit_limit
+#: model:ir.model.fields,help:account.field_res_users__use_partner_credit_limit
+msgid "Set a value greater than 0.0 to activate a credit limit check"
+msgstr ""
+"Установите значение больше 0.0 для активации проверки кредитного лимита"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_account_tag__active
@@ -14360,7 +14372,7 @@ msgstr "Счет-фактура уже содержит строки, он не 
 #: code:addons/account/static/src/js/tours/account.js:0
 #, python-format
 msgid "The invoice having been sent, the button has changed priority."
-msgstr ""
+msgstr "После отправки счета приоритет кнопки изменился."
 
 #. module: account
 #. odoo-python
@@ -15232,14 +15244,6 @@ msgstr ""
 
 #. module: account
 #. odoo-python
-#: code:addons/account/models/account_journal.py:0
-#, python-format
-msgid ""
-"This journal is associated with a payment method. You cannot archive it"
-msgstr "Этот журнал связан с методом оплаты. Вы не можете его архивировать"
-
-#. module: account
-#. odoo-python
 #: code:addons/account/models/company.py:0
 #, python-format
 msgid "This journal is not in strict mode."
@@ -15636,12 +15640,9 @@ msgstr "Трансфер в %s "
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid ""
-"Trigger alerts when creating Invoices and Sales Orders for Partners with a "
-"Total Receivable amount exceeding a limit."
+"Trigger alerts when creating Invoices and Sales Orders for Partners with a Total Receivable amount exceeding a limit.\n"
+"                                        <br/><small>Set a value greater than 0.0 to activate a credit limit check</small>"
 msgstr ""
-"Предупреждения при создании документов продажи и заказов на продажу для "
-"партнеров с общей суммой дебиторской задолженности, превышающей "
-"установленный лимит."
 
 #. module: account
 #. odoo-python
@@ -16075,7 +16076,7 @@ msgstr ""
 #: code:addons/account/static/src/js/tours/account.js:0
 #, python-format
 msgid "Validate."
-msgstr ""
+msgstr "Подтвердить."
 
 #. module: account
 #: model:mail.message.subtype,name:account.mt_invoice_validated
@@ -16155,8 +16156,10 @@ msgstr "Созданный счет поставщика"
 #. odoo-python
 #: code:addons/account/models/account_analytic_account.py:0
 #: code:addons/account/models/chart_template.py:0
+#: model:ir.actions.act_window,name:account.res_partner_action_supplier_bills
 #: model:ir.model.fields.selection,name:account.selection__res_company__quick_edit_mode__in_invoices
 #: model_terms:ir.ui.view,arch_db:account.account_analytic_account_view_form_inherit
+#: model_terms:ir.ui.view,arch_db:account.partner_view_buttons
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 #: model_terms:ir.ui.view,arch_db:account.res_partner_view_search
 #, python-format
@@ -16216,6 +16219,19 @@ msgstr "Продавец:"
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
 msgid "Vendors"
 msgstr "Поставщики"
+
+#. module: account
+#: model_terms:ir.actions.act_window,help:account.res_partner_action_supplier_bills
+msgid ""
+"Vendors bills can be pre-generated based on purchase\n"
+"                orders or receipts. This allows you to control bills\n"
+"                you receive from your vendor according to the draft\n"
+"                document in Odoo."
+msgstr ""
+"Счета поставщиков можно заранее создать на основе \n"
+"                заказов на закупку или накладных. Это помогает \n"
+"                контролировать счета от поставщика по черновым \n"
+"                документам в Odoo."
 
 #. module: account
 #. odoo-javascript
@@ -16886,6 +16902,15 @@ msgstr ""
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/account_account.py:0
+#, python-format
+msgid "You cannot deprecate an account that is used in a tax distribution."
+msgstr ""
+"Вы не можете отменить использование счета, который применяется в "
+"распределении налогов."
+
+#. module: account
+#. odoo-python
 #: code:addons/account/models/res_config_settings.py:0
 #, python-format
 msgid ""
@@ -17137,8 +17162,9 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 #, python-format
-msgid "You cannot switch the type of a posted document."
-msgstr "Вы не можете изменить тип размещенного документа."
+msgid "You cannot switch the type of a document which has been posted once."
+msgstr ""
+"Вы не можете изменить тип документа, который был проведен хотя бы раз."
 
 #. module: account
 #. odoo-python
@@ -17322,6 +17348,13 @@ msgstr "[FURN_8999] Трехместный диван"
 #, python-format
 msgid "[Not set]"
 msgstr "[Не установлено]"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid "_draft"
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -17523,6 +17556,12 @@ msgid "name"
 msgstr "имя"
 
 #. module: account
+#: model:ir.actions.report,print_report_name:account.account_invoices
+#: model:ir.actions.report,print_report_name:account.account_invoices_without_payment
+msgid "object._get_report_base_filename()"
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_tax_repartition_line__repartition_type__tax
 #: model:ir.model.fields.selection,name:account.selection__account_tax_repartition_line_template__repartition_type__tax
 msgid "of tax"
@@ -17660,6 +17699,11 @@ msgstr ""
 #. module: account
 #: model:mail.template,report_name:account.mail_template_data_payment_receipt
 msgid "{{ (object.name or '').replace('/','-') }}"
+msgstr ""
+
+#. module: account
+#: model:mail.template,report_name:account.email_template_edi_invoice
+msgid "{{ object._get_report_mail_attachment_filename() }}"
 msgstr ""
 
 #. module: account

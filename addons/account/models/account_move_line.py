@@ -1,11 +1,11 @@
 import ast
 from collections import defaultdict
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 from datetime import date, timedelta
 from functools import lru_cache
 
 from odoo import api, fields, models, Command, _
-from odoo.exceptions import ValidationError, UserError
+from odoo.exceptions import ValidationError, UserError, RedirectWarning
 from odoo.tools import frozendict, formatLang, format_date, float_compare, Query
 from odoo.tools.sql import create_index
 from odoo.addons.web.controllers.utils import clean_action
@@ -592,6 +592,7 @@ class AccountMoveLine(models.Model):
                     company_id=line.company_id.id,
                     partner_id=line.partner_id.id,
                     move_type=line.move_id.move_type,
+                    journal_id=line.journal_id.id,
                 )
         for line in self:
             if not line.account_id and line.display_type not in ('line_section', 'line_note'):
@@ -1183,7 +1184,6 @@ class AccountMoveLine(models.Model):
         # Avoid using api.constrains here as in case of a write on
         # account move and account move line in the same operation, the check would be done
         # before all write are complete, causing a false positive
-        self.flush_recordset()
         for line in self.filtered(lambda x: x.display_type not in ('line_section', 'line_note')):
             account = line.account_id
             journal = line.move_id.journal_id
@@ -1419,11 +1419,10 @@ class AccountMoveLine(models.Model):
         before = existing()
         yield
         after = existing()
-        protected = container.get('protected', {})
         for line in after:
             if (
                 line.display_type == 'product'
-                and 'amount_currency' not in protected.get(line, {})
+                and not self.env.is_protected(self._fields['amount_currency'], line)
                 and (not changed('amount_currency') or line not in before)
             ):
                 amount_currency = line.move_id.direction_sign * line.currency_id.round(line.price_subtotal)
@@ -1436,7 +1435,7 @@ class AccountMoveLine(models.Model):
         for line in after:
             if (
                 (changed('amount_currency') or changed('currency_rate') or changed('move_type'))
-                and 'balance' not in protected.get(line, {})
+                and not self.env.is_protected(self._fields['balance'], line)
                 and (not changed('balance') or (line not in before and not line.balance))
             ):
                 balance = line.company_id.currency_id.round(line.amount_currency / line.currency_rate)
@@ -1453,11 +1452,12 @@ class AccountMoveLine(models.Model):
         container = {'records': self}
         move_container = {'records': moves}
         with moves._check_balanced(move_container),\
+             ExitStack() as exit_stack,\
              moves._sync_dynamic_lines(move_container),\
              self._sync_invoice(container):
             lines = super().create([self._sanitize_vals(vals) for vals in vals_list])
+            exit_stack.enter_context(self.env.protecting([protected for vals, line in zip(vals_list, lines) for protected in self.env['account.move']._get_protected_vals(vals, line)]))
             container['records'] = lines
-            container['protected'] = {line: set(vals.keys()) for line, vals in zip(lines, vals_list)}
 
         for line in lines:
             if line.move_id.state == 'posted':
@@ -1512,8 +1512,9 @@ class AccountMoveLine(models.Model):
 
         move_container = {'records': self.move_id}
         with self.move_id._check_balanced(move_container),\
+             self.env.protecting(self.env['account.move']._get_protected_vals(vals, self)),\
              self.move_id._sync_dynamic_lines(move_container),\
-             self._sync_invoice({'records': self, 'protected': {line: set(vals.keys()) for line in self}}):
+             self._sync_invoice({'records': self}):
             self = line_to_write
             if not self:
                 return True
@@ -1558,8 +1559,19 @@ class AccountMoveLine(models.Model):
                                 tracking_value_ids=tracking_value_ids
                             )
 
-
         return result
+
+    def _parse_flush_fnames(self, fnames):
+        if fnames and {'balance', 'amount_currency'} & set(fnames):
+            # flush the amount currency to avoid triggering check_amount_currency_balance_sign
+            fnames = {'balance', 'amount_currency'} | set(fnames)
+        return fnames
+
+    def flush_recordset(self, fnames=None):
+        return super().flush_recordset(self._parse_flush_fnames(fnames))
+
+    def flush_model(self, fnames=None):
+        return super().flush_model(self._parse_flush_fnames(fnames))
 
     def _valid_field_parameter(self, field, name):
         # EXTENDS models
@@ -2563,15 +2575,37 @@ class AccountMoveLine(models.Model):
     # -------------------------------------------------------------------------
 
     def _validate_analytic_distribution(self):
+        lines_with_missing_analytic_distribution = self.env['account.move.line']
         for line in self.filtered(lambda line: line.display_type == 'product'):
-            line._validate_distribution(**{
-                        'product': line.product_id.id,
-                        'account': line.account_id.id,
-                        'business_domain': line.move_id.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'invoice'
-                                           or line.move_id.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'bill'
-                                           or 'general',
-                        'company_id': line.company_id.id,
-            })
+            try:
+                line._validate_distribution(
+                    company_id=line.company_id.id,
+                    product=line.product_id.id,
+                    account=line.account_id.id,
+                    business_domain=(
+                        'invoice' if line.move_id.is_sale_document(True)
+                        else 'bill' if line.move_id.is_purchase_document(True)
+                        else 'general'
+                    ),
+                )
+            except ValidationError:
+                lines_with_missing_analytic_distribution += line
+        if lines_with_missing_analytic_distribution:
+            msg = _("One or more lines require a 100% analytic distribution.")
+            if len(self.move_id) == 1:
+                raise ValidationError(msg)
+            raise RedirectWarning(
+                message=msg,
+                action={
+                    'view_mode': 'list',
+                    'name': _('Items With Missing Analytic Distribution'),
+                    'res_model': 'account.move.line',
+                    'type': 'ir.actions.act_window',
+                    'domain': [('id', 'in', lines_with_missing_analytic_distribution.ids)],
+                    'views': [(self.env.ref('account.view_move_line_tree').id, 'list')],
+                },
+                button_text=_("See items"),
+            )
 
     def _create_analytic_lines(self):
         """ Create analytic items upon validation of an account.move.line having an analytic distribution.

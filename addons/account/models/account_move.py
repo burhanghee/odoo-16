@@ -28,7 +28,7 @@ from odoo.tools import (
     get_lang,
     groupby,
     is_html_empty,
-    sql
+    StackMap,
 )
 
 MAX_HASH_VERSION = 3
@@ -72,6 +72,10 @@ class AccountMove(models.Model):
     @property
     def _sequence_yearly_regex(self):
         return self.journal_id.sequence_override_regex or super()._sequence_yearly_regex
+
+    @property
+    def _sequence_year_range_regex(self):
+        return self.journal_id.sequence_override_regex or super()._sequence_year_range_regex
 
     @property
     def _sequence_fixed_regex(self):
@@ -620,7 +624,8 @@ class AccountMove(models.Model):
     def _compute_hide_post_button(self):
         for record in self:
             record.hide_post_button = record.state != 'draft' \
-                or record.auto_post != 'no' and record.date > fields.Date.context_today(record)
+                or record.auto_post != 'no' and \
+                record.date and record.date > fields.Date.context_today(record)
 
     @api.depends('journal_id')
     def _compute_company_id(self):
@@ -898,7 +903,18 @@ class AccountMove(models.Model):
 
     @api.depends('amount_residual', 'move_type', 'state', 'company_id')
     def _compute_payment_state(self):
-        stored_ids = tuple(self.ids)
+        posted_invoices = self.filtered(lambda m: m.state == 'posted' and m.is_invoice(True) and m.payment_state != 'invoicing_legacy')
+        for move in self - posted_invoices:
+            if move.payment_state == 'invoicing_legacy':
+                # invoicing_legacy state is set via SQL when setting setting field
+                # invoicing_switch_threshold (defined in account_accountant).
+                # The only way of going out of this state is through this setting,
+                # so we don't recompute it here.
+                continue
+
+            move.payment_state = 'not_paid'
+
+        stored_ids = tuple(posted_invoices.ids)
         if stored_ids:
             self.env['account.partial.reconcile'].flush_model()
             self.env['account.payment'].flush_model(['is_matched'])
@@ -933,57 +949,45 @@ class AccountMove(models.Model):
         else:
             payment_data = {}
 
-        for invoice in self:
-            if invoice.payment_state == 'invoicing_legacy':
-                # invoicing_legacy state is set via SQL when setting setting field
-                # invoicing_switch_threshold (defined in account_accountant).
-                # The only way of going out of this state is through this setting,
-                # so we don't recompute it here.
-                continue
+        for invoice in posted_invoices:
 
             currencies = invoice._get_lines_onchange_currency().currency_id
             currency = currencies if len(currencies) == 1 else invoice.company_id.currency_id
             reconciliation_vals = payment_data.get(invoice.id, [])
-            payment_state_matters = invoice.is_invoice(True)
 
             # Restrict on 'receivable'/'payable' lines for invoices/expense entries.
-            if payment_state_matters:
-                reconciliation_vals = [x for x in reconciliation_vals if x['source_line_account_type'] in ('asset_receivable', 'liability_payable')]
+
+            reconciliation_vals = [x for x in reconciliation_vals if x['source_line_account_type'] in ('asset_receivable', 'liability_payable')]
 
             new_pmt_state = 'not_paid'
-            if invoice.state == 'posted':
+            if currency.is_zero(invoice.amount_residual):
+                if any(x['has_payment'] or x['has_st_line'] for x in reconciliation_vals):
 
-                # Posted invoice/expense entry.
-                if payment_state_matters:
+                    # Check if the invoice/expense entry is fully paid or 'in_payment'.
+                    if all(x['all_payments_matched'] for x in reconciliation_vals):
+                        new_pmt_state = 'paid'
+                    else:
+                        new_pmt_state = invoice._get_invoice_in_payment_state()
 
-                    if currency.is_zero(invoice.amount_residual):
-                        if any(x['has_payment'] or x['has_st_line'] for x in reconciliation_vals):
+                else:
+                    new_pmt_state = 'paid'
 
-                            # Check if the invoice/expense entry is fully paid or 'in_payment'.
-                            if all(x['all_payments_matched'] for x in reconciliation_vals):
-                                new_pmt_state = 'paid'
-                            else:
-                                new_pmt_state = invoice._get_invoice_in_payment_state()
+                    reverse_move_types = set()
+                    for x in reconciliation_vals:
+                        for move_type in x['counterpart_move_types']:
+                            reverse_move_types.add(move_type)
 
-                        else:
-                            new_pmt_state = 'paid'
+                    in_reverse = (invoice.move_type in ('in_invoice', 'in_receipt')
+                                    and (reverse_move_types == {'in_refund'} or reverse_move_types == {'in_refund', 'entry'}))
+                    out_reverse = (invoice.move_type in ('out_invoice', 'out_receipt')
+                                    and (reverse_move_types == {'out_refund'} or reverse_move_types == {'out_refund', 'entry'}))
+                    misc_reverse = (invoice.move_type in ('entry', 'out_refund', 'in_refund')
+                                    and reverse_move_types == {'entry'})
+                    if in_reverse or out_reverse or misc_reverse:
+                        new_pmt_state = 'reversed'
 
-                            reverse_move_types = set()
-                            for x in reconciliation_vals:
-                                for move_type in x['counterpart_move_types']:
-                                    reverse_move_types.add(move_type)
-
-                            in_reverse = (invoice.move_type in ('in_invoice', 'in_receipt')
-                                          and (reverse_move_types == {'in_refund'} or reverse_move_types == {'in_refund', 'entry'}))
-                            out_reverse = (invoice.move_type in ('out_invoice', 'out_receipt')
-                                           and (reverse_move_types == {'out_refund'} or reverse_move_types == {'out_refund', 'entry'}))
-                            misc_reverse = (invoice.move_type in ('entry', 'out_refund', 'in_refund')
-                                            and reverse_move_types == {'entry'})
-                            if in_reverse or out_reverse or misc_reverse:
-                                new_pmt_state = 'reversed'
-
-                    elif reconciliation_vals:
-                        new_pmt_state = 'partial'
+            elif reconciliation_vals:
+                new_pmt_state = 'partial'
 
             invoice.payment_state = new_pmt_state
 
@@ -1497,8 +1501,9 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
 
     def _inverse_tax_totals(self):
-        if self.env.context.get('skip_invoice_sync'):
-            return
+        with self._disable_recursion({'records': self}, 'skip_invoice_sync') as disabled:
+            if disabled:
+                return
         with self._sync_dynamic_line(
             existing_key_fname='term_key',
             needed_vals_fname='needed_terms',
@@ -1738,7 +1743,7 @@ class AccountMove(models.Model):
                 AND move2.journal_id = move.journal_id
                 AND move2.move_type = move.move_type
                 AND move2.id != move.id
-            WHERE move.id IN %s AND move2.state = 'posted'
+            WHERE move.id IN %s AND move2.state = 'posted' AND move2.name != '/'
         ''', [tuple(moves.ids)])
         res = self._cr.fetchall()
         if res:
@@ -1876,6 +1881,7 @@ class AccountMove(models.Model):
         having the biggest balance.
         '''
         self.ensure_one()
+        self = self.with_company(self.company_id.id)
         def _compute_cash_rounding(self, total_amount_currency):
             ''' Compute the amount differences due to the cash rounding.
             :param self:                    The current account.move record.
@@ -2287,17 +2293,26 @@ class AccountMove(models.Model):
             if command[0] == Command.SET:
                 yield from self.env['account.move.line'].browse(command[2]).move_id.ids
 
+    def _get_protected_vals(self, vals, records):
+        protected = set()
+        for fname in vals:
+            field = records._fields[fname]
+            if field.inverse or (field.compute and not field.readonly):
+                protected.update(self.pool.field_computed.get(field, [field]))
+        return [(protected, rec) for rec in records] if protected else []
+
     @api.model_create_multi
     def create(self, vals_list):
         if any('state' in vals and vals.get('state') == 'posted' for vals in vals_list):
             raise UserError(_('You cannot create a move already in the posted state. Please create a draft move and post it after.'))
         container = {'records': self}
         with self._check_balanced(container):
-            with self._sync_dynamic_lines(container):
+            with ExitStack() as exit_stack, self._sync_dynamic_lines(container):
                 for vals in vals_list:
                     self._sanitize_vals(vals)
                 stolen_moves = self.browse(set(move for vals in vals_list for move in self._stolen_move(vals)))
                 moves = super().create(vals_list)
+                exit_stack.enter_context(self.env.protecting([protected for vals, move in zip(vals_list, moves) for protected in self._get_protected_vals(vals, move)]))
                 container['records'] = moves | stolen_moves
             for move, vals in zip(moves, vals_list):
                 if 'tax_totals' in vals:
@@ -2336,14 +2351,9 @@ class AccountMove(models.Model):
                     raise UserError(_('The Journal Entry sequence is not conform to the current format. Only the Accountant can change it.'))
                 move.journal_id.sequence_override_regex = False
 
-        to_protect = []
-        for fname in vals:
-            field = self._fields[fname]
-            if field.compute and not field.readonly:
-                to_protect.append(field)
         stolen_moves = self.browse(set(move for move in self._stolen_move(vals)))
         container = {'records': self | stolen_moves}
-        with self.env.protecting(to_protect, self), self._check_balanced(container):
+        with self.env.protecting(self._get_protected_vals(vals, self)), self._check_balanced(container):
             with self._sync_dynamic_lines(container):
                 res = super(AccountMove, self.with_context(
                     skip_account_move_synchronization=True,
@@ -2353,8 +2363,9 @@ class AccountMove(models.Model):
                 # Reset the name of draft moves when changing the journal.
                 # Protected against holes in the pre-validation checks.
                 if 'journal_id' in vals and 'name' not in vals:
-                    self.name = False
-                    self._compute_name()
+                    draft_move = self.filtered(lambda m: not m.posted_before)
+                    draft_move.name = False
+                    draft_move._compute_name()
 
                 # You can't change the date of a not-locked move to a locked period.
                 # You can't post a new journal entry inside a locked period.
@@ -2380,7 +2391,7 @@ class AccountMove(models.Model):
                 if 'tax_totals' in vals:
                     super(AccountMove, move).write({'tax_totals': vals['tax_totals']})
 
-        if 'journal_id' in vals:
+        if any(field in vals for field in ['journal_id', 'currency_id']):
             self.line_ids._check_constrains_account_id_journal_id()
 
         return res
@@ -3713,7 +3724,7 @@ class AccountMove(models.Model):
     def action_switch_invoice_into_refund_credit_note(self):
         for move in self:
             if move.posted_before:
-                raise ValidationError(_("You cannot switch the type of a posted document."))
+                raise ValidationError(_("You cannot switch the type of a document which has been posted once."))
             if move.move_type == 'entry':
                 raise ValidationError(_("This action isn't available for this document."))
             in_out, old_move_type = move.move_type.split('_')
@@ -3971,6 +3982,20 @@ class AccountMove(models.Model):
 
     def _get_report_base_filename(self):
         return self._get_move_display_name()
+
+    def _get_report_attachment_filename(self):
+        self.ensure_one()
+        if self.state == 'posted':
+            name = self.name or _('INV')
+        else:
+            name = self._get_report_base_filename()
+        return f"{name.replace('/', '_')}.pdf"
+
+    def _get_report_mail_attachment_filename(self):
+        self.ensure_one()
+        invoice_name = (self.name or '').replace('/', '_')
+        post_suffix = _('_draft') if self.state == 'draft' else ''
+        return _('Invoice_%(name)s%(post)s', name=invoice_name, post=post_suffix)
 
     # -------------------------------------------------------------------------
     # CRON
@@ -4234,15 +4259,10 @@ class AccountMove(models.Model):
     def _disable_recursion(self, container, key, default=None, target=True):
         """Apply the context key to all environments inside this context manager.
 
-        If this context key is already set on the recordsets, yield `True`.
-        The recordsets modified are the one in the container, as well as all the
-        `self` recordsets of the calling stack.
-        This more or less gives the wanted context to all records inside of the
-        context manager.
+        If the value linked to the key is the same as the target, yield `True`.
+        Check for the key both in the record's context and in the recursion stack.
 
-        :param container: A mutable dict that needs to at least contain the key
-                          `records`. Can contain other items if changing the env
-                          is needed.
+        :param container: deprecated, not used anymore
         :param key: The context key to apply to the recordsets.
         :param default: the default value of the context key, if it isn't defined
                         yet in the context
@@ -4251,24 +4271,18 @@ class AccountMove(models.Model):
         :return: True iff we should just exit the context manager
         """
 
-        disabled = container['records'].env.context.get(key, default) == target
-        previous_values = {}
-        previous_envs = set(self.env.transaction.envs)
-        if not disabled:  # it wasn't disabled yet, disable it now
-            for env in self.env.transaction.envs:
-                previous_values[env] = env.context.get(key, EMPTY)
-                env.context = frozendict({**env.context, key: target})
+        stack = self.env.cr.cache.setdefault('account_disable_recursion_stack', StackMap())
+        try:
+            current_val = stack[key]
+        except KeyError:
+            current_val = self.env.context.get(key, default)
+
+        disabled = current_val == target
+        stack.pushmap({key: target})
         try:
             yield disabled
         finally:
-            for env, val in previous_values.items():
-                if val != EMPTY:
-                    env.context = frozendict({**env.context, key: val})
-                else:
-                    env.context = frozendict({k: v for k, v in env.context.items() if k != key})
-            for env in (self.env.transaction.envs - previous_envs):
-                if key in env.context:
-                    env.context = frozendict({k: v for k, v in env.context.items() if k != key})
+            stack.popmap()
 
     # ------------------------------------------------------------
     # MAIL.THREAD

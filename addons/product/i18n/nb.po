@@ -11,15 +11,15 @@
 # Lars Aam <lars.aam@vikenfiber.no>, 2022
 # Henning Fyllingsnes, 2023
 # Bjørn H. Sandvik, 2023
-# Rune Restad, 2024
+# Rune Restad, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"POT-Creation-Date: 2025-05-06 20:36+0000\n"
 "PO-Revision-Date: 2022-09-22 05:54+0000\n"
-"Last-Translator: Rune Restad, 2024\n"
+"Last-Translator: Rune Restad, 2025\n"
 "Language-Team: Norwegian Bokmål (https://app.transifex.com/odoo/teams/41243/nb/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2241,7 +2241,7 @@ msgstr "Produktprissøk"
 #: code:addons/product/models/product_product.py:0
 #, python-format
 msgid "Products: %(category)s"
-msgstr ""
+msgstr "Produkter: %(category)s"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_config_settings__module_loyalty
@@ -3157,6 +3157,7 @@ msgstr ""
 
 #. module: product
 #. odoo-python
+#: code:addons/product/models/product_category.py:0
 #: code:addons/product/models/product_category.py:0
 #, python-format
 msgid "You cannot delete the %s product category."

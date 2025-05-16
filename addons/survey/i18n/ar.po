@@ -3,18 +3,19 @@
 # 	* survey
 # 
 # Translators:
-# Mustafa Rawi <mustafa@cubexco.com>, 2022
+# Mustafa Rawi <mustafa@mrawi.com>, 2022
 # Martin Trigaux, 2022
 # Niyas Raphy, 2023
-# Malaz Abuidris <msea@odoo.com>, 2023
+# Malaz Abuidris <msea@odoo.com>, 2025
+# Wil Odoo, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2025-05-06 20:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2023\n"
+"Last-Translator: Wil Odoo, 2025\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -73,6 +74,13 @@ msgstr "% مكتمل "
 #, python-format
 msgid "%s (copy)"
 msgstr "%s (نسخة)"
+
+#. module: survey
+#. odoo-python
+#: code:addons/survey/models/survey_question.py:0
+#, python-format
+msgid "%s Votes"
+msgstr "%s أصوات "
 
 #. module: survey
 #. odoo-python
@@ -2007,6 +2015,11 @@ msgid "Group By"
 msgstr "التجميع حسب "
 
 #. module: survey
+#: model:ir.model,name:survey.model_ir_http
+msgid "HTTP Routing"
+msgstr "مسار HTTP"
+
+#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__existing_mode
 #: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
 msgid "Handle existing"
@@ -3508,6 +3521,11 @@ msgid "Products"
 msgstr "المنتجات"
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
+msgid "Public share URL"
+msgstr ""
+
+#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question_answer__question_id
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__question_id
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_answer_view_search
@@ -4832,6 +4850,11 @@ msgstr "استخدم أدوات مرئية داعمة مثيرة للاهتما�
 #, python-format
 msgid "Use humor and make jokes"
 msgstr "استخدم حس الفكاهة والمزح "
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
+msgid "Use template"
+msgstr "استخدم القالب "
 
 #. module: survey
 #. odoo-javascript

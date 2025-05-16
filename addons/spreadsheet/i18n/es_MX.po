@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"POT-Creation-Date: 2025-05-08 20:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:55+0000\n"
 "Last-Translator: Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2024\n"
 "Language-Team: Spanish (Mexico) (https://app.transifex.com/odoo/teams/41243/es_MX/)\n"
@@ -3991,6 +3991,20 @@ msgstr "La base (%s) debe estar entre 2 y 36 inclusivo."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
+msgid "The base (%s) must be strictly positive."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "The base must be different from 1."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
 msgid "The baseline value is invalid"
 msgstr "El valor base no es válido"
 
@@ -4431,6 +4445,13 @@ msgstr "La vida (%s) debe ser estrictamente positiva."
 #, python-format
 msgid "The logarithm of a number, base e (euler's number)."
 msgstr "El logaritmo de un número, base e (número de euler)."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, python-format
+msgid "The logarithm of a number, for a given base."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5132,6 +5153,7 @@ msgstr "El valor (%s) debe ser positivo o cero."
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The value (%s) must be strictly positive."
